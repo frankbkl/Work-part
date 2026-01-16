@@ -1,0 +1,226 @@
+{
+  "name": "Xinhuaweb_newspapper",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://www.chinanews.com.cn/rss/finance.xml",
+        "options": {
+          "ignoreSSL": false
+        }
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        160,
+        -48
+      ],
+      "id": "c7d426eb-50ed-4276-93ab-7152dcf18f64",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "25c3ff10-ae0d-4a59-800b-1fc74d832a5e",
+              "leftValue": "={{ DateTime.fromRFC2822($json.pubDate) }}",
+              "rightValue": "={{ $now.minus({ days: 1 }) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        -32
+      ],
+      "id": "fa9122a4-b895-43bc-a06d-9291d23375a5",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "be1faa51-6b0d-4502-876e-6de8dfdadf7e",
+              "name": "标题",
+              "value": "={{ $json.title.substring(0, 30) }}......    .",
+              "type": "string"
+            },
+            {
+              "id": "c4ccf718-b0ae-482b-864d-48bd03e80554",
+              "name": "URL",
+              "value": "={{ $json.link }}",
+              "type": "string"
+            },
+            {
+              "id": "6b6e6070-34f4-4efe-b9e0-8ad1563f1598",
+              "name": "日期",
+              "value": "={{ DateTime.fromRFC2822($json.pubDate).toFormat('yyyy-MM-dd HH:mm') }}",
+              "type": "string"
+            },
+            {
+              "id": "a36e8f7a-0ad9-4404-820c-53462f6dfbc3",
+              "name": "来源",
+              "value": "=新华网",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        656,
+        -32
+      ],
+      "id": "9f8f9b42-7d48-4982-8e93-dee19ffd7070",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        176
+      ],
+      "id": "d76e915d-cea2-49bb-83d7-1449d1895cbe",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "fromEmail": "1036699138@qq.com",
+        "toEmail": "1036699138@qq.com",
+        "subject": "今日新华网财经新闻汇总",
+        "emailFormat": "text",
+        "text": "您好，这是系统为您自动生成的今日新闻汇总 Excel 文件，请查收附件。",
+        "options": {
+          "attachments": "data"
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        464,
+        192
+      ],
+      "id": "da9e2f74-50a8-42ed-9925-3ef884296d29",
+      "name": "Send email",
+      "webhookId": "0b6b0c71-6204-4395-9a84-50768708b432",
+      "credentials": {
+        "smtp": {
+          "id": "Q9P3NmHGb7fY8jZG",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 17,
+              "triggerAtMinute": 43
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -176,
+        -48
+      ],
+      "id": "cd59b8e7-165f-4e13-9921-60464a623b2c",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "454b11e8-6af3-49ae-866d-6bdd37603a81",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ea6dd601d06ed099f24a3f7cd6e135ab83fc03e3ad03b779b6cfd5ab80c1ab58"
+  },
+  "id": "V33RlLnTuEbYd0sCRCHzP",
+  "tags": []
+}
