@@ -1,0 +1,10 @@
+Mac系统运行IOPaint水印工具
+python3 --version 首先查看python的版本，一定要装3.11或者3.10系列
+
+1、首先，安装iopaint： pip3 install iopaint
+2、下载big-lama.pt模型并放在 ~/.cache/torch/hub/checkpoints/目录中
+3、运行命令处理  iopaint run --model=lama --device=mps --image="/待处理的图片目录" --mask="/mask.png" --output="/输出图片目录"
+
+如果没有 ~/.cache/torch/hub/checkpoints/目录，那就使用mkdir -p 创建一下
+【Windows里面big-lama.pt放在  C:\Users\Administrator\.cache\torch\hub\checkpoints\  这个目录下】
+
